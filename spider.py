@@ -12,8 +12,9 @@ from settings import MONGO_HOST, MONGO_PORT
 
 
 class UserTweetSpider:
-    def __init__(self, uid, start_page=1):
-        self.uid = uid
+    def __init__(self, users):
+        self.uid = None
+        self.users = users
         self.blog_list_url_format = "https://weibo.com/ajax/statuses/mymblog?uid={}&page={}"
         self.blog_detail_url_format = "https://weibo.com/ajax/statuses/show?id={}"
         self.headers = {
@@ -24,7 +25,7 @@ class UserTweetSpider:
         self.mongo_cli = MongoClient(host=MONGO_HOST, port=MONGO_PORT)
         self.db = self.mongo_cli.get_database("weibo")
         self.collection = self.db.get_collection("Tweet")
-        self.start_page = start_page
+        self.start_page = 1
         self.empty_cnt = 0
         self.js_error = 0
         self.pre_is_js_error = False
@@ -65,6 +66,11 @@ class UserTweetSpider:
                 is_final_page = False
             page += 1
         logger.info(f"crawl {self.uid} success, blog cnt is {self.count[self.uid]}")
+
+    def start(self):
+        for uid in self.users.keys():
+            self.uid = uid
+            self.start_page = self.users[uid]
 
     def crawl_one_page(self, page: int) -> bool:
         logger.info(f"crawling user {self.uid}, page {page}")
@@ -162,5 +168,5 @@ class UserTweetSpider:
 
 if __name__ == '__main__':
     # spider = UserTweetSpider("1937187173", 1)
-    spider = UserTweetSpider("1937187173", 10)
+    spider = UserTweetSpider({"1937187173": 10})
     spider.crawl()
