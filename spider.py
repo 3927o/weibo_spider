@@ -12,13 +12,13 @@ from settings import MONGO_HOST, MONGO_PORT
 
 
 class UserTweetSpider:
-    def __init__(self, users):
+    def __init__(self, users: dict):
         self.uid = None
         self.users = users
         self.blog_list_url_format = "https://weibo.com/ajax/statuses/mymblog?uid={}&page={}"
         self.blog_detail_url_format = "https://weibo.com/ajax/statuses/show?id={}"
         self.headers = {
-            "cookie": r'SINAGLOBAL=7897790998927.175.1621517097341; __gads=ID=341af79fd8aff5e5:T=1630505768:S=ALNI_MbC38scgB7G1UPz-iCiOllmtuvCnA; _ga=GA1.2.1921815252.1630505811; login_sid_t=c5b007a653cc16ac5e99c4c8be3613b3; cross_origin_proto=SSL; _s_tentry=-; Apache=8898375541886.855.1630505819004; ULV=1630505819009:2:1:1:8898375541886.855.1630505819004:1621517097345; XSRF-TOKEN=ldMYZ0bGVDGwD8evaBjbaOtD; WBtopGlobal_register_version=2021091101; SSOLoginState=1631293331; ALF=1662950419; WBPSESS=RYZ_qd4WKsNGIqKMW2iHoPpk6Aq3xKrXjBXrbnhq5IU_bgKT73clZ5nHpxZVFnARiAADEgQbuKCAerKw_gTApfbcZ4XqRwdJ6AqPzhtfmu14icFd6LI25zAqK6xNqm-P; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhqzMmrDmn_cJfLk2IqPHDz5JpX5K-hUgL.FoME1KefSo5ceKz2dJLoIp7LxKML1KBLBKnLxKqL1hnLBoMNeo.0SKq7So2E; SCF=AkjTF3Qclgqrmqy3qTwtGkPxdRarxJsruDKqly7EOyWCTKzTHD3_YK3ncVb0qXICURffZeScsPfWPUpkQg8zN7o.; SUB=_2A25MORo0DeRhGeFM4lEU9i7Kyj6IHXVvTwz8rDV8PUJbmtANLWfwkW9NQI-ho3A5m21HqAsRb3MJmUz__ggRgmh6',
+            "cookie": r'SINAGLOBAL=7897790998927.175.1621517097341; __gads=ID=341af79fd8aff5e5:T=1630505768:S=ALNI_MbC38scgB7G1UPz-iCiOllmtuvCnA; _ga=GA1.2.1921815252.1630505811; login_sid_t=c5b007a653cc16ac5e99c4c8be3613b3; cross_origin_proto=SSL; _s_tentry=-; Apache=8898375541886.855.1630505819004; ULV=1630505819009:2:1:1:8898375541886.855.1630505819004:1621517097345; XSRF-TOKEN=ldMYZ0bGVDGwD8evaBjbaOtD; WBtopGlobal_register_version=2021091101; SSOLoginState=1631293331; SCF=AkjTF3Qclgqrmqy3qTwtGkPxdRarxJsruDKqly7EOyWCTKzTHD3_YK3ncVb0qXICURffZeScsPfWPUpkQg8zN7o.; ALF=1634046157; SUB=_2A25MOnOdDeRhGeFM4lEU9i7Kyj6IHXVvxR3VrDV8PUJbkNB-LXj-kW1NQI-ho1K1BIxYNMsy2TMNrUqmwEm7q1Cd; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9WhqzMmrDmn_cJfLk2IqPHDz5JpX5oz75NHD95QNeo.0SKq7So2EWs4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNS0z4e0-cehqpentt',
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36"
         }
         self.count = dict()
@@ -46,13 +46,12 @@ class UserTweetSpider:
             self.handle_js_error(url)
             return {}
 
-        # todo js error 过多时休息一会儿, ok
-        # todo 连续爬取多个用户
         # todo 自动更新cookie
         self.pre_is_js_error = False
         return resp
 
     def crawl(self):
+        self.empty_cnt = 0
         page = self.start_page
         is_final_page = False
         while not is_final_page:
@@ -71,6 +70,7 @@ class UserTweetSpider:
         for uid in self.users.keys():
             self.uid = uid
             self.start_page = self.users[uid]
+            self.crawl()
 
     def crawl_one_page(self, page: int) -> bool:
         logger.info(f"crawling user {self.uid}, page {page}")
@@ -168,5 +168,14 @@ class UserTweetSpider:
 
 if __name__ == '__main__':
     # spider = UserTweetSpider("1937187173", 1)
-    spider = UserTweetSpider({"1937187173": 10})
-    spider.crawl()
+    # spider = UserTweetSpider({"3229450293": 522, "2784361770": 1, "3687019147": 1, "5537781788": 1,
+    #                           "2270636837": 1, "2782520515": 1, "2993099575": 1, "2726922721": 1, "3097688767": 1,
+    #                           "2489610225": 1, "2620622835": 1, "2541592687": 1, "1662558237": 1, "5131766197": 1,
+    #                           "1988438334": 1})
+    spider = UserTweetSpider({"1751714412": 1, "1703371307": 1, "1698857957": 1, "1706406001": 1, "1644489953": 1,
+                              "1899950161": 1, "1960601312": 1, "1962117985": 1, "1738004582": 1, "1734530730": 1,
+                              "1898885525": 1, "1720962692": 1, "1700087532": 1, "1735221154": 1, "1653603955": 1,
+                              "1735937570": 1, "1801817195": 1, "1844967414": 1, "1882632930": 1, "1975154821": 1,
+                              "2011075080": 1, "1232121710": 1, "1915671961": 1, "1314608344": 1, "3203137375": 1,
+                              "1960785875": 1, "1931775031": 1, "1904947977": 1, "1699258907": 1, "1700720163": 1})
+    spider.start()
